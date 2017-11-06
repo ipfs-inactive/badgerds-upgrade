@@ -1,0 +1,60 @@
+diff -u a/badger/y/metrics.go b/badger/y/metrics.go
+--- a/badger/y/metrics.go	2017-11-06 13:29:30.951753123 +0100
++++ b/badger/y/metrics.go	2017-11-06 13:32:56.177181803 +0100
+@@ -52,17 +52,17 @@
+
+ // These variables are global and have cumulative values for all kv stores.
+ func init() {
+-	NumReads = expvar.NewInt("badger_disk_reads_total")
+-	NumWrites = expvar.NewInt("badger_disk_writes_total")
+-	NumBytesRead = expvar.NewInt("badger_read_bytes")
+-	NumBytesWritten = expvar.NewInt("badger_written_bytes")
+-	NumLSMGets = expvar.NewMap("badger_lsm_level_gets_total")
+-	NumLSMBloomHits = expvar.NewMap("badger_lsm_bloom_hits_total")
+-	NumGets = expvar.NewInt("badger_gets_total")
+-	NumPuts = expvar.NewInt("badger_puts_total")
+-	NumBlockedPuts = expvar.NewInt("badger_blocked_puts_total")
+-	NumMemtableGets = expvar.NewInt("badger_memtable_gets_total")
+-	LSMSize = expvar.NewMap("badger_lsm_size_bytes")
+-	VlogSize = expvar.NewMap("badger_vlog_size_bytes")
+-	PendingWrites = expvar.NewMap("badger_pending_writes_total")
++	NumReads = expvar.NewInt("badger_disk_reads_total_10")
++	NumWrites = expvar.NewInt("badger_disk_writes_total_10")
++	NumBytesRead = expvar.NewInt("badger_read_bytes_10")
++	NumBytesWritten = expvar.NewInt("badger_written_bytes_10")
++	NumLSMGets = expvar.NewMap("badger_lsm_level_gets_total_10")
++	NumLSMBloomHits = expvar.NewMap("badger_lsm_bloom_hits_total_10")
++	NumGets = expvar.NewInt("badger_gets_total_10")
++	NumPuts = expvar.NewInt("badger_puts_total_10")
++	NumBlockedPuts = expvar.NewInt("badger_blocked_puts_total_10")
++	NumMemtableGets = expvar.NewInt("badger_memtable_gets_total_10")
++	LSMSize = expvar.NewMap("badger_lsm_size_bytes_10")
++	VlogSize = expvar.NewMap("badger_vlog_size_bytes_10")
++	PendingWrites = expvar.NewMap("badger_pending_writes_total_10")
+ }
+
+diff -u a/badger/protos/manifest.pb.go b/badger/protos/manifest.pb.go
+--- a/badger/protos/manifest.pb.go	2017-11-06 13:29:30.951753123 +0100
++++ b/badger/protos/manifest.pb.go	2017-11-06 13:42:12.856952921 +0100
+@@ -56,7 +56,7 @@
+
+ type ManifestChange struct {
+ 	Id    uint64                   `protobuf:"varint,1,opt,name=Id,proto3" json:"Id,omitempty"`
+-	Op    ManifestChange_Operation `protobuf:"varint,2,opt,name=Op,proto3,enum=protos.ManifestChange_Operation" json:"Op,omitempty"`
++	Op    ManifestChange_Operation `protobuf:"varint,2,opt,name=Op,proto3,enum=protos.10.ManifestChange_Operation" json:"Op,omitempty"`
+ 	Level uint32                   `protobuf:"varint,3,opt,name=Level,proto3" json:"Level,omitempty"`
+ }
+
+@@ -87,9 +87,9 @@
+ }
+
+ func init() {
+-	proto.RegisterType((*ManifestChangeSet)(nil), "protos.ManifestChangeSet")
+-	proto.RegisterType((*ManifestChange)(nil), "protos.ManifestChange")
+-	proto.RegisterEnum("protos.ManifestChange_Operation", ManifestChange_Operation_name, ManifestChange_Operation_value)
++	proto.RegisterType((*ManifestChangeSet)(nil), "protos.10.ManifestChangeSet")
++	proto.RegisterType((*ManifestChange)(nil), "protos.10.ManifestChange")
++	proto.RegisterEnum("protos.10.ManifestChange_Operation", ManifestChange_Operation_name, ManifestChange_Operation_value)
+ }
+ func (m *ManifestChangeSet) Marshal() (dAtA []byte, err error) {
+ 	size := m.Size()

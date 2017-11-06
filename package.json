@@ -12,6 +12,18 @@
       "hash": "QmVcLF2CgjQb5BWmYFWsDfxDjbzBfcChfdHRedxeL3dV4K",
       "name": "cli",
       "version": "0.0.0"
+    },
+    {
+      "author": "dgraph-io",
+      "hash": "QmaYHhxyszcAYob7WP8nSXnkJjzwfsWyApZEJFaJoJnXNP",
+      "name": "badger",
+      "version": "1.4.0"
+    },
+    {
+      "author": "dgraph-io",
+      "hash": "QmQBccCGkYxLSdqzvUc6eTDqT9dqPcT7fCHzH6Z4ftWst3",
+      "name": "badger",
+      "version": "2.2.1"
     }
   ],
   "gxVersion": "0.11.0",
