@@ -23,7 +23,7 @@ $ go install
 
 ## Usage
 
-### Upgrade to latest supported version
+### Upgrade badger datastores to latest supported version
 ```
 $ badgerds-upgrade upgrade
 ```

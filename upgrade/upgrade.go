@@ -14,6 +14,7 @@ import (
 
 	badger10 "gx/ipfs/QmQBccCGkYxLSdqzvUc6eTDqT9dqPcT7fCHzH6Z4ftWst3/badger"
 	errors "gx/ipfs/QmVmDhyTTUcQXFD1rRQ64fGLMSAoaQvNH3hwuaCFAPq2hy/errors"
+	lock "gx/ipfs/QmWi28zbQG6B1xfaaWx5cYoLn3kBFU6pQ6GWQNRV5P6dNe/lock"
 	badger08 "gx/ipfs/QmaYHhxyszcAYob7WP8nSXnkJjzwfsWyApZEJFaJoJnXNP/badger"
 )
 
@@ -58,6 +59,12 @@ func Upgrade(baseDir string) error {
 	if err != nil {
 		return err
 	}
+
+	unlock, err := lock.Lock(filepath.Join(p.path, LockFile))
+	if err != nil {
+		return err
+	}
+	defer unlock.Close()
 
 	paths, err := p.loadSpecs()
 	if err != nil {
@@ -125,12 +132,13 @@ func (c *Process) try08(path string) error {
 	}
 	out := make(chan keyValue)
 	go func() {
-		defer kv.Close()
 		it := kv.NewIterator(badger08.DefaultIteratorOptions)
-		defer it.Close()
 		for it.Rewind(); it.Valid(); it.Next() {
 			item := it.Item()
-			err := item.Value(func(data []byte) error {
+			err := item.Value(func(d []byte) error {
+				data := make([]byte, len(d))
+				copy(data, d)
+
 				select {
 				case out <- keyValue{key: item.Key(), value: data}:
 				case <-c.ctx.Done():
@@ -139,13 +147,20 @@ func (c *Process) try08(path string) error {
 				return nil
 			})
 			if err == ErrCancelled {
+				it.Close()
+				kv.Close()
 				return
 			}
 			if err != nil {
 				Log.Printf("Error: %s\n", err.Error())
+				it.Close()
+				kv.Close()
 				return
 			}
 		}
+		it.Close()
+		kv.Close()
+
 		close(out)
 	}()
 
@@ -171,28 +186,39 @@ func (c *Process) migrateData(data chan keyValue, path string) error {
 		}
 		defer db.Close()
 
-		txn := db.NewTransaction(true)
-		defer txn.Discard()
-
 		Log.Printf("Moving data to %s\n", temp)
 		n := 0
 
+		var txn *badger10.Txn
 		for entry := range data {
+			if txn == nil {
+				txn = db.NewTransaction(true)
+			}
+
 			err := txn.Set(entry.key, entry.value)
 			if err != nil {
 				c.cancel()
 				return err
 			}
 
-			if n%1000 == 0 {
+			if n%200 == 0 {
+				err := txn.Commit(nil)
+				if err != nil {
+					return err
+				}
+				txn = nil
 				Log.Printf("%d entries done\r\x1b[A", n)
 			}
 			n++
 		}
+
 		Log.Printf("%d entries done\n", n)
 		Log.Printf("Commiting transaction\n")
 
-		return txn.Commit(nil)
+		if txn != nil {
+			return txn.Commit(nil)
+		}
+		return nil
 	}()
 	if err != nil {
 		return err

@@ -28,10 +28,6 @@ func main() {
 		},
 	}
 
-	app.Before = func(c *cli.Context) error {
-		return nil
-	}
-
 	app.Commands = []cli.Command{
 		UpgradeCommand,
 	}
