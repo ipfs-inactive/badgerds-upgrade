@@ -1,3 +1,5 @@
+**NOTE: This tool is most likely broken and the data it would migrate will be corrupted, see https://github.com/ipfs/badgerds-upgrade/issues/2#issuecomment-343670241 for more. DO NOT USE THIS TOOL UNTIL THE ISSUE GETS RELOVED**
+
 badgerds-upgrade
 ================
 
