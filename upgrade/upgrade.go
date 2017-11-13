@@ -11,7 +11,6 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
-	"time"
 
 	badger10 "gx/ipfs/QmQBccCGkYxLSdqzvUc6eTDqT9dqPcT7fCHzH6Z4ftWst3/badger"
 	errors "gx/ipfs/QmVmDhyTTUcQXFD1rRQ64fGLMSAoaQvNH3hwuaCFAPq2hy/errors"
@@ -133,21 +132,11 @@ func (c *Process) try08(path string) error {
 	}
 	out := make(chan keyValue)
 	go func() {
-		opt := badger08.DefaultIteratorOptions
-		opt.PrefetchValues = false
-		it := kv.NewIterator(opt)
+		it := kv.NewIterator(badger08.DefaultIteratorOptions)
 		for it.Rewind(); it.Valid(); it.Next() {
 			item := it.Item()
-			var kvi badger08.KVItem
-			err := kv.Get(item.Key(), &kvi)
-			if err != nil {
-				Log.Printf("Error: %s\n", err.Error())
-				it.Close()
-				kv.Close()
-				return
-			}
 
-			err = kvi.Value(func(d []byte) error {
+			err := item.Value(func(d []byte) error {
 				data := make([]byte, len(d))
 				key := make([]byte, len(item.Key()))
 				copy(data, d)

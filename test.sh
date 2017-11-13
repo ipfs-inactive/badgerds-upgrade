@@ -1,5 +1,7 @@
 #!/bin/bash
 
+rm badgerds-upgrade
+
 gx install
 go build -o badgerds-upgrade
 
