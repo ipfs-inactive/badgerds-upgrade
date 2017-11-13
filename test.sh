@@ -29,10 +29,11 @@ for i in {1..10000}; do
 done
 
 ./ipfs0.4.11 add testfiles --local -rqQ
+./ipfs0.4.11 pin ls | wc -l
 
-./badgerds-upgrade upgrade
+./badgerds-upgrade upgrade 2>&1
 
-./ipfs0.4.12-rc2 daemon
+./ipfs0.4.12-rc2 pin ls | wc -l
 
 cd ..
 rm -rf ${TEST_DIR}

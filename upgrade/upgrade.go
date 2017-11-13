@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 
 	badger10 "gx/ipfs/QmQBccCGkYxLSdqzvUc6eTDqT9dqPcT7fCHzH6Z4ftWst3/badger"
 	errors "gx/ipfs/QmVmDhyTTUcQXFD1rRQ64fGLMSAoaQvNH3hwuaCFAPq2hy/errors"
@@ -132,15 +133,28 @@ func (c *Process) try08(path string) error {
 	}
 	out := make(chan keyValue)
 	go func() {
-		it := kv.NewIterator(badger08.DefaultIteratorOptions)
+		opt := badger08.DefaultIteratorOptions
+		opt.PrefetchValues = false
+		it := kv.NewIterator(opt)
 		for it.Rewind(); it.Valid(); it.Next() {
 			item := it.Item()
-			err := item.Value(func(d []byte) error {
+			var kvi badger08.KVItem
+			err := kv.Get(item.Key(), &kvi)
+			if err != nil {
+				Log.Printf("Error: %s\n", err.Error())
+				it.Close()
+				kv.Close()
+				return
+			}
+
+			err = kvi.Value(func(d []byte) error {
 				data := make([]byte, len(d))
+				key := make([]byte, len(item.Key()))
 				copy(data, d)
+				copy(key, item.Key())
 
 				select {
-				case out <- keyValue{key: item.Key(), value: data}:
+				case out <- keyValue{key: key, value: data}:
 				case <-c.ctx.Done():
 					return ErrCancelled
 				}
@@ -198,6 +212,7 @@ func (c *Process) migrateData(data chan keyValue, path string) error {
 			err := txn.Set(entry.key, entry.value)
 			if err != nil {
 				c.cancel()
+				txn.Discard()
 				return err
 			}
 
